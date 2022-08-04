@@ -1,0 +1,73 @@
+name: dotnet-on-aks-wasi-node-pool
+on: workflow_dispatch
+env:
+  LOCATION: eastus
+  RESOURCE_GROUP: rg-dotnet-on-wasi-node-pool
+  CONTAINER_REGISTRY: crdotnetwasi
+  AKS_CLUSTER: aks-dotnet-on-wasi-node-pool
+  WASI_NODE_POOL: wasinodepool
+jobs:
+  create-aks-cluster-with-wasi-node-pool:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install the aks-preview Extension
+      run: az extension add --name aks-preview --upgrade
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Create Resource Group
+      run: az group create -l ${LOCATION} -g ${RESOURCE_GROUP}
+    - name: Create Container Registry
+      run: az acr create -n ${CONTAINER_REGISTRY} -l ${LOCATION} -g ${RESOURCE_GROUP} --sku Basic
+    - name: Create AKS Cluster
+      run: az aks create -n ${AKS_CLUSTER} -l ${LOCATION} -g ${RESOURCE_GROUP} -c 1 --generate-ssh-keys --attach-acr ${CONTAINER_REGISTRY}
+    - name: Add a WASI Node Pool
+      run: az aks nodepool add -n ${WASI_NODE_POOL} -g ${RESOURCE_GROUP} -c 1 --cluster-name ${AKS_CLUSTER} --workload-runtime wasmwasi
+    - name: Log Out From Azure
+      run: |
+        az logout
+        az cache purge
+        az account clear
+  build-and-push-spin-application-image:
+    needs: [create-aks-cluster-with-wasi-node-pool]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup .NET 7.0 SDK
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '7.0.x'
+        include-prerelease: true
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Log in to Container Registry
+      run: az acr login -n ${CONTAINER_REGISTRY}
+    - name: Log Out From Azure
+      run: |
+        docker logout
+        az logout
+        az cache purge
+        az account clear
+  deploy-spin-application-to-wasi-node-pool:
+    needs: [create-aks-cluster-with-wasi-node-pool, build-and-push-spin-application-image]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup .NET 7.0 SDK
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '7.0.x'
+        include-prerelease: true
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Log in to Container Registry
+      run: az acr login -n ${CONTAINER_REGISTRY}
+    - name: Log Out From Azure
+      run: |
+        docker logout
+        az logout
+        az cache purge
+        az account clear
