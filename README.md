@@ -1,0 +1,1 @@
+# demo-dotnet-on-aks-wasi-node-pool
