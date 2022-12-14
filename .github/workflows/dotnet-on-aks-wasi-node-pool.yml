@@ -33,17 +33,20 @@ jobs:
     needs: [create-aks-cluster-with-wasi-node-pool]
     runs-on: ubuntu-latest
     steps:
-    - name: Setup .NET 7.0 SDK
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '7.0.x'
-        include-prerelease: true
+    - name: Checkout
+      uses: actions/checkout@v3
     - name: Log in to Azure
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: Log in to Container Registry
       run: az acr login -n ${CONTAINER_REGISTRY}
+    - name: Build Docker Image
+      run: |
+        docker build src/Demo.Wasm.Spin/ -t ${CONTAINER_REGISTRY}.azurecr.io/spin-with-dotnet-7:${{ github.sha }}
+    - name: Push Docker Image to Container Registry
+      run: |
+        docker push ${CONTAINER_REGISTRY}.azurecr.io/spin-with-dotnet-7:${{ github.sha }}
     - name: Log Out From Azure
       run: |
         docker logout
@@ -54,17 +57,10 @@ jobs:
     needs: [create-aks-cluster-with-wasi-node-pool, build-and-push-spin-application-image]
     runs-on: ubuntu-latest
     steps:
-    - name: Setup .NET 7.0 SDK
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '7.0.x'
-        include-prerelease: true
     - name: Log in to Azure
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    - name: Log in to Container Registry
-      run: az acr login -n ${CONTAINER_REGISTRY}
     - name: Log Out From Azure
       run: |
         docker logout
