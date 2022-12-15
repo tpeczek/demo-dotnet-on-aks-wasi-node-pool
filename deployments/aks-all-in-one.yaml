@@ -1,0 +1,41 @@
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: "wasmtime-spin-v1"
+handler: "spin"
+scheduling:
+  nodeSelector:
+    "kubernetes.azure.com/wasmtime-spin-v1": "true"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spin-with-dotnet-7
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spin-with-dotnet-7
+  template:
+    metadata:
+      labels:
+        app: spin-with-dotnet-7
+    spec:
+      runtimeClassName: wasmtime-spin-v1
+      containers:
+        - name: spin-with-dotnet-7
+          image: crdotnetwasi.azurecr.io/spin-with-dotnet-7:latest
+          command: ["/"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spin-with-dotnet-7
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: spin-with-dotnet-7
+  type: LoadBalancer

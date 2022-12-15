@@ -22,7 +22,7 @@ jobs:
       run: az acr create -n ${CONTAINER_REGISTRY} -l ${LOCATION} -g ${RESOURCE_GROUP} --sku Basic
     - name: Create AKS Cluster
       run: az aks create -n ${AKS_CLUSTER} -l ${LOCATION} -g ${RESOURCE_GROUP} -c 1 --generate-ssh-keys --attach-acr ${CONTAINER_REGISTRY}
-    - name: Add a WASI Node Pool
+    - name: Add a WASM/WASI Node Pool
       run: az aks nodepool add -n ${WASI_NODE_POOL} -g ${RESOURCE_GROUP} -c 1 --cluster-name ${AKS_CLUSTER} --workload-runtime wasmwasi
     - name: Log Out From Azure
       run: |
@@ -40,20 +40,24 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: Log in to Container Registry
-      run: az acr login -n ${CONTAINER_REGISTRY}
-    - name: Build Docker Image
+      run: |
+        az acr login -n ${CONTAINER_REGISTRY}
+    - name: Build Image
       run: |
         docker build src/Demo.Wasm.Spin/ -t ${CONTAINER_REGISTRY}.azurecr.io/spin-with-dotnet-7:${{ github.sha }}
-    - name: Push Docker Image to Container Registry
+    - name: Push Image to Container Registry
       run: |
         docker push ${CONTAINER_REGISTRY}.azurecr.io/spin-with-dotnet-7:${{ github.sha }}
+    - name: Tag Image as Latest
+      run: |
+        az acr import --name ${CONTAINER_REGISTRY} --source ${CONTAINER_REGISTRY}.azurecr.io/spin-with-dotnet-7:${{ github.sha }} --image spin-with-dotnet-7:latest
     - name: Log Out From Azure
       run: |
         docker logout
         az logout
         az cache purge
         az account clear
-  deploy-spin-application-to-wasi-node-pool:
+  deploy-spin-application-to-wasm-wasi-node-pool:
     needs: [create-aks-cluster-with-wasi-node-pool, build-and-push-spin-application-image]
     runs-on: ubuntu-latest
     steps:
@@ -61,6 +65,12 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Get AKS Credentials
+      run: |
+        az aks get-credentials -n ${AKS_CLUSTER} -g ${RESOURCE_GROUP}
+    - name: Apply AKS Configuration
+      run: |
+        kubectl apply -f deployments/aks-all-in-one.yaml
     - name: Log Out From Azure
       run: |
         docker logout

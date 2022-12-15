@@ -10,3 +10,4 @@ id = "demo-wasm-spin"
 source = "bin/Release/net7.0/Demo.Wasm.Spin.wasm"
 [component.trigger]
 route = "/..."
+executor = { type = "wagi" }
