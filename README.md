@@ -1,7 +1,7 @@
 # Running .NET Based Spin Application On WASM/WASI Node Pool in AKS
 
 Sample project for demonstrating how to run a .NET based [Spin](https://developer.fermyon.com/spin/index) application on WASM/WASI node pool in Azure Kubernetes Service. You can read more here:
-- []()
+- [Experimenting With .NET & WebAssembly - Running .NET Based Spin Application On WASI Node Pool in AKS](https://www.tpeczek.com/2022/12/experimenting-with-net-webassembly.html)
 
 ## Sponsor This Project
 
