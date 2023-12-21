@@ -1,5 +1,8 @@
-name: dotnet-on-aks-wasi-node-pool
+name: dotnet-based-spin-application-on-aks-wasi-node-pool
 on: workflow_dispatch
+permissions:
+  id-token: write
+  contents: read
 env:
   LOCATION: eastus
   RESOURCE_GROUP: rg-dotnet-on-wasi-node-pool
@@ -15,7 +18,9 @@ jobs:
     - name: Log in to Azure
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     - name: Create Resource Group
       run: az group create -l ${LOCATION} -g ${RESOURCE_GROUP}
     - name: Create Container Registry
@@ -34,11 +39,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Log in to Azure
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     - name: Log in to Container Registry
       run: |
         az acr login -n ${CONTAINER_REGISTRY}
@@ -62,17 +69,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Log in to Azure
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     - name: Get AKS Credentials
       run: |
         az aks get-credentials -n ${AKS_CLUSTER} -g ${RESOURCE_GROUP}
     - name: Apply AKS Configuration
       run: |
-        kubectl apply -f deployments/aks-all-in-one.yaml
+        kubectl apply -f deployments/wasmtime-spin-v1-all-in-one.yaml
     - name: Log Out From Azure
       run: |
         docker logout
