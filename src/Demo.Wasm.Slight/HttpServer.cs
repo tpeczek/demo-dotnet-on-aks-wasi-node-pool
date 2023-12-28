@@ -1,41 +1,66 @@
 ﻿using Demo.Wasm.Slight.Wasi;
-using System.Runtime.InteropServices;
+using System;
 
 namespace Demo.Wasm.Slight
 {
-    [StructLayout(LayoutKind.Sequential)]
-    internal readonly struct HttpServer
+    internal static class HttpServer
     {
-        private readonly uint _idx;
+        private static uint? _index;
+        private static HttpRouter? _router;
 
-        public readonly uint Index => _idx;
-
-        public static HttpServer Serve(string address, HttpRouter router)
+        public static void Serve(string address, HttpRouter router)
         {
-            WasiString wasiAddress = WasiString.FromString(address);
-            WasiExpected<HttpServer> expected = new WasiExpected<HttpServer>();
+            if (_index.HasValue || (_router is not null))
+            {
+                throw new Exception("The server is already running!");
+            }
 
-            HttpServerFunctions.Serve(ref wasiAddress, router, ref expected);
+            WasiString wasiAddress = WasiString.FromString(address);
+            WasiExpected<uint> expected = new WasiExpected<uint>();
+
+            HttpServerFunctions.Serve(ref wasiAddress, router.Index, ref expected);
 
             if (expected.IsError)
             {
                 throw new Exception(expected.Error?.ErrorWithDescription.ToString());
             }
 
-#pragma warning disable CS8629 // Nullable value type may be null.
-            return (HttpServer)expected.Result;
-#pragma warning restore CS8629 // Nullable value type may be null.
+            _index = expected.Result;
+            _router = router;
         }
 
-        public void Stop()
+        public static void Stop()
         {
-            WasiExpected<HttpServer> expected = new WasiExpected<HttpServer>();
+            WasiExpected<uint> expected = new WasiExpected<uint>();
 
-            HttpServerFunctions.Stop(this, ref expected);
-
-            if (expected.IsError)
+            if (_index.HasValue)
             {
-                throw new Exception(expected.Error?.ErrorWithDescription.ToString());
+                HttpServerFunctions.Stop(_index.Value, ref expected);
+
+                _index = null;
+                _router = null;
+
+                if (expected.IsError)
+                {
+                    throw new Exception(expected.Error?.ErrorWithDescription.ToString());
+                }
+            }
+        }
+
+        private static unsafe void HandleRequest(ref HttpRequest request, out WasiExpected<HttpResponse> result)
+        {
+            Func<HttpRequest, HttpResponse>? handler = _router?.GetHandler(request.Method, request.Uri);
+            if (handler is null)
+            {
+
+                HttpResponse response = new HttpResponse(404);
+                response.SetBody($"Handler Not Found (Requested URI: {request.Uri})");
+
+                result = new WasiExpected<HttpResponse>(response);
+            }
+            else
+            {
+                result = new(handler.Invoke(request));
             }
         }
     }
