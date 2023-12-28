@@ -40,56 +40,21 @@ namespace Demo.Wasm.Slight.Wasi
         public WasiString ErrorWithDescription => _errorWithDescription;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    internal readonly struct WasiHttpRouter
-    {
-        private readonly uint _idx;
-
-        public readonly uint Index => _idx;
-    }
-
     [StructLayout(LayoutKind.Explicit)]
-    internal readonly struct WasiHttpRouterOrError
+    internal readonly struct WasiExpected<T> where T : struct
     {
         [FieldOffset(0)]
         private readonly bool _isError;
 
         [FieldOffset(4)]
-        private readonly WasiHttpRouter _router;
+        private readonly T _result;
 
         [FieldOffset(4)]
         private readonly WasiError _error;
 
         public readonly bool IsError => _isError;
 
-        public readonly WasiHttpRouter? Router => _isError ? null : _router;
-
-        public readonly WasiError? Error => _isError ? _error : null;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal readonly struct WasiHttpServer
-    {
-        private readonly uint _idx;
-
-        public readonly uint Index => _idx;
-    }
-
-    [StructLayout(LayoutKind.Explicit)]
-    internal readonly struct WasiHttpServerOrError
-    {
-        [FieldOffset(0)]
-        private readonly bool _isError;
-
-        [FieldOffset(4)]
-        private readonly WasiHttpServer _server;
-
-        [FieldOffset(4)]
-        private readonly WasiError _error;
-
-        public readonly bool IsError => _isError;
-
-        public readonly WasiHttpServer? Server => _isError ? null : _server;
+        public readonly T? Result => _isError ? null : _result;
 
         public readonly WasiError? Error => _isError ? _error : null;
     }
@@ -97,27 +62,27 @@ namespace Demo.Wasm.Slight.Wasi
     internal static class HttpRouterFunctions
     {
         [MethodImpl(MethodImplOptions.InternalCall)]
-        internal static extern unsafe void http_router_new(ref WasiHttpRouterOrError ret0);
+        internal static extern unsafe void New(ref WasiExpected<HttpRouter> ret0);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        internal static extern unsafe void http_router_get(WasiHttpRouter self, ref WasiString route, ref WasiString handler, ref WasiHttpRouterOrError ret0);
+        internal static extern unsafe void Get(HttpRouter self, ref WasiString route, ref WasiString handler, ref WasiExpected<HttpRouter> ret0);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        internal static extern unsafe void http_router_put(WasiHttpRouter self, ref WasiString route, ref WasiString handler, ref WasiHttpRouterOrError ret0);
+        internal static extern unsafe void Put(HttpRouter self, ref WasiString route, ref WasiString handler, ref WasiExpected<HttpRouter> ret0);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        internal static extern unsafe void http_router_post(WasiHttpRouter self, ref WasiString route, ref WasiString handler, ref WasiHttpRouterOrError ret0);
+        internal static extern unsafe void Post(HttpRouter self, ref WasiString route, ref WasiString handler, ref WasiExpected<HttpRouter> ret0);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        internal static extern unsafe void http_router_delete(WasiHttpRouter self, ref WasiString route, ref WasiString handler, ref WasiHttpRouterOrError ret0);
+        internal static extern unsafe void Delete(HttpRouter self, ref WasiString route, ref WasiString handler, ref WasiExpected<HttpRouter> ret0);
     }
 
     internal static class HttpServerFunctions
     {
         [MethodImpl(MethodImplOptions.InternalCall)]
-        internal static extern unsafe void http_server_serve(ref WasiString address, WasiHttpRouter router, ref WasiHttpServerOrError ret0);
+        internal static extern unsafe void Serve(ref WasiString address, HttpRouter router, ref WasiExpected<HttpServer> ret0);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        internal static extern unsafe void http_server_stop(WasiHttpServer self, ref WasiHttpServerOrError ret0);
+        internal static extern unsafe void Stop(HttpServer self, ref WasiExpected<HttpServer> ret0);
     }
 }
