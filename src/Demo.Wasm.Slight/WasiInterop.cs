@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Demo.Wasm.Slight.Wasi
@@ -91,5 +92,32 @@ namespace Demo.Wasm.Slight.Wasi
         public readonly WasiHttpServer? Server => _isError ? null : _server;
 
         public readonly WasiError? Error => _isError ? _error : null;
+    }
+
+    internal static class HttpRouterFunctions
+    {
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal static extern unsafe void http_router_new(ref WasiHttpRouterOrError ret0);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal static extern unsafe void http_router_get(WasiHttpRouter self, ref WasiString route, ref WasiString handler, ref WasiHttpRouterOrError ret0);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal static extern unsafe void http_router_put(WasiHttpRouter self, ref WasiString route, ref WasiString handler, ref WasiHttpRouterOrError ret0);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal static extern unsafe void http_router_post(WasiHttpRouter self, ref WasiString route, ref WasiString handler, ref WasiHttpRouterOrError ret0);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal static extern unsafe void http_router_delete(WasiHttpRouter self, ref WasiString route, ref WasiString handler, ref WasiHttpRouterOrError ret0);
+    }
+
+    internal static class HttpServerFunctions
+    {
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal static extern unsafe void http_server_serve(ref WasiString address, WasiHttpRouter router, ref WasiHttpServerOrError ret0);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal static extern unsafe void http_server_stop(WasiHttpServer self, ref WasiHttpServerOrError ret0);
     }
 }
