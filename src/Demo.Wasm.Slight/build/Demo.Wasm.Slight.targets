@@ -1,5 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
 		<WasiNativeFileReference Include="$(MSBuildThisFileDirectory)..\native\http.c" />
+    <WasiNativeFileReference Include="$(MSBuildThisFileDirectory)..\native\dotnet-interop.c" />
+    <WasiAfterRuntimeLoaded Include="attach_internal_calls" />
 	</ItemGroup>
 </Project>
