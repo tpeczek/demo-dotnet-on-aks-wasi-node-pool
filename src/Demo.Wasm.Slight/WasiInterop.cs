@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Demo.Wasm.Slight.Wasi
 {
@@ -119,35 +120,37 @@ namespace Demo.Wasm.Slight.Wasi
         public T? Value => (_isSome == 1) ? _value : default;
     }
 
-    [StructLayout(LayoutKind.Explicit)]
-    internal readonly struct WasiExpected<T> where T : struct
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct WasiExpected<T> where T : struct
     {
-        [FieldOffset(0)]
-        private readonly bool _isError;
+        private byte _isError;
 
-        [FieldOffset(4)]
-        private readonly T _result;
+        private T _resultOrError;
 
-        [FieldOffset(4)]
-        private readonly WasiError _error;
+        public bool IsError => _isError != 0;
+
+        public T? Result => (_isError == 0) ? null : _resultOrError;
+
+        public unsafe WasiError? Error
+        {
+            get
+            {
+                if (_isError != 0)
+                {
+                    var errorPointer = Unsafe.AsPointer(ref _resultOrError);
+                    
+                    return Marshal.PtrToStructure<WasiError>((nint)errorPointer);
+                }
+
+                return null;
+            }
+        }
 
         public WasiExpected(T result)
         {
-            _isError = false;
-            _result = result;
+            _isError = 0;
+            _resultOrError = result;
         }
-
-        public WasiExpected(WasiError error)
-        {
-            _isError = true;
-            _error = error;
-        }
-
-        public readonly bool IsError => _isError;
-
-        public readonly T? Result => _isError ? null : _result;
-
-        public readonly WasiError? Error => _isError ? _error : null;
     }
 
     internal static class HttpRouterFunctions
