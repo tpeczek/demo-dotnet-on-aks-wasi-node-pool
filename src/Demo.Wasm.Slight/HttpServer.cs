@@ -15,10 +15,7 @@ namespace Demo.Wasm.Slight
                 throw new Exception("The server is already running!");
             }
 
-            WasiString wasiAddress = WasiString.FromString(address);
-            WasiExpected<uint> expected = new WasiExpected<uint>();
-
-            HttpServerFunctions.Serve(ref wasiAddress, router.Index, ref expected);
+            HttpServerFunctions.Serve(WasiString.FromString(address), router.Index, out WasiExpected<uint> expected);
 
             if (expected.IsError)
             {
@@ -31,11 +28,9 @@ namespace Demo.Wasm.Slight
 
         public static void Stop()
         {
-            WasiExpected<uint> expected = new WasiExpected<uint>();
-
             if (_index.HasValue)
             {
-                HttpServerFunctions.Stop(_index.Value, ref expected);
+                HttpServerFunctions.Stop(_index.Value, out WasiExpected<uint> expected);
 
                 _index = null;
                 _router = null;

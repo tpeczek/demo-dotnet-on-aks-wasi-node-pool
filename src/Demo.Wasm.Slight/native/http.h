@@ -13,22 +13,12 @@ extern "C"
   } http_router_t;
   void http_router_free(http_router_t *ptr);
   http_router_t http_router_clone(http_router_t *ptr);
-  http_router_t http_router_new(void *data);
-  void* http_router_get(http_router_t *ptr);
-  
-  __attribute__((weak))
-  void http_router_dtor(void *data);
   
   typedef struct {
     uint32_t idx;
   } http_server_t;
   void http_server_free(http_server_t *ptr);
   http_server_t http_server_clone(http_server_t *ptr);
-  http_server_t http_server_new(void *data);
-  void* http_server_get(http_server_t *ptr);
-  
-  __attribute__((weak))
-  void http_server_dtor(void *data);
   
   typedef struct {
     char *ptr;

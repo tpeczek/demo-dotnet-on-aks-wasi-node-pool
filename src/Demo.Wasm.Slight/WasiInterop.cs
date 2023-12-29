@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Demo.Wasm.Slight.Wasi
 {
@@ -129,7 +128,7 @@ namespace Demo.Wasm.Slight.Wasi
 
         public bool IsError => _isError != 0;
 
-        public T? Result => (_isError == 0) ? null : _resultOrError;
+        public T? Result => (_isError != 0) ? null : _resultOrError;
 
         public unsafe WasiError? Error
         {
@@ -156,27 +155,27 @@ namespace Demo.Wasm.Slight.Wasi
     internal static class HttpRouterFunctions
     {
         [MethodImpl(MethodImplOptions.InternalCall)]
-        internal static extern unsafe void New(ref WasiExpected<uint> ret0);
+        internal static extern unsafe void New(out WasiExpected<uint> ret0);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        internal static extern unsafe void Get(uint httpRouterIndex, ref WasiString route, ref WasiString handler, ref WasiExpected<uint> ret0);
+        internal static extern unsafe void Get(uint httpRouterIndex, WasiString route, WasiString handler, out WasiExpected<uint> ret0);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        internal static extern unsafe void Put(uint httpRouterIndex, ref WasiString route, ref WasiString handler, ref WasiExpected<uint> ret0);
+        internal static extern unsafe void Put(uint httpRouterIndex, WasiString route, WasiString handler, out WasiExpected<uint> ret0);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        internal static extern unsafe void Post(uint httpRouterIndex, ref WasiString route, ref WasiString handler, ref WasiExpected<uint> ret0);
+        internal static extern unsafe void Post(uint httpRouterIndex, WasiString route, WasiString handler, out WasiExpected<uint> ret0);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        internal static extern unsafe void Delete(uint httpRouterIndex, ref WasiString route, ref WasiString handler, ref WasiExpected<uint> ret0);
+        internal static extern unsafe void Delete(uint httpRouterIndex, WasiString route, WasiString handler, out WasiExpected<uint> ret0);
     }
 
     internal static class HttpServerFunctions
     {
         [MethodImpl(MethodImplOptions.InternalCall)]
-        internal static extern unsafe void Serve(ref WasiString address, uint httpRouterIndex, ref WasiExpected<uint> ret0);
+        internal static extern unsafe void Serve(WasiString address, uint httpRouterIndex, out WasiExpected<uint> ret0);
 
         [MethodImpl(MethodImplOptions.InternalCall)]
-        internal static extern unsafe void Stop(uint httpServerIndex, ref WasiExpected<uint> ret0);
+        internal static extern unsafe void Stop(uint httpServerIndex, out WasiExpected<uint> ret0);
     }
 }

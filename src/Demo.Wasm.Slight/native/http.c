@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <http.h>
+#include "http.h"
 
 __attribute__((weak, export_name("canonical_abi_realloc")))
 void *canonical_abi_realloc(
@@ -37,26 +37,6 @@ http_router_t http_router_clone(http_router_t *ptr) {
   return (http_router_t){__resource_router_clone(ptr->idx)};
 }
 
-__attribute__((import_module("canonical_abi"), import_name("resource_new_router")))
-uint32_t __resource_router_new(uint32_t val);
-
-http_router_t http_router_new(void *data) {
-  return (http_router_t){__resource_router_new((uint32_t) data)};
-}
-
-__attribute__((import_module("canonical_abi"), import_name("resource_get_router")))
-uint32_t __resource_router_get(uint32_t idx);
-
-void* http_router_get(http_router_t *ptr) {
-  return (void*) __resource_router_get(ptr->idx);
-}
-
-__attribute__((export_name("canonical_abi_drop_router")))
-void __resource_router_dtor(uint32_t val) {
-  if (http_router_dtor)
-  http_router_dtor((void*) val);
-}
-
 __attribute__((import_module("canonical_abi"), import_name("resource_drop_server")))
 void __resource_server_drop(uint32_t idx);
 
@@ -69,26 +49,6 @@ uint32_t __resource_server_clone(uint32_t idx);
 
 http_server_t http_server_clone(http_server_t *ptr) {
   return (http_server_t){__resource_server_clone(ptr->idx)};
-}
-
-__attribute__((import_module("canonical_abi"), import_name("resource_new_server")))
-uint32_t __resource_server_new(uint32_t val);
-
-http_server_t http_server_new(void *data) {
-  return (http_server_t){__resource_server_new((uint32_t) data)};
-}
-
-__attribute__((import_module("canonical_abi"), import_name("resource_get_server")))
-uint32_t __resource_server_get(uint32_t idx);
-
-void* http_server_get(http_server_t *ptr) {
-  return (void*) __resource_server_get(ptr->idx);
-}
-
-__attribute__((export_name("canonical_abi_drop_server")))
-void __resource_server_dtor(uint32_t val) {
-  if (http_server_dtor)
-  http_server_dtor((void*) val);
 }
 #include <string.h>
 
@@ -142,228 +102,235 @@ void http_expected_unit_error_free(http_expected_unit_error_t *ptr) {
 
 __attribute__((aligned(4)))
 static uint8_t RET_AREA[16];
-__attribute__((export_name("router::new")))
-int32_t __wasm_export_http_router_new(void) {
-  http_expected_router_error_t ret;
-  http_router_new(&ret);
+__attribute__((import_module("http"), import_name("router::new")))
+void __wasm_import_http_router_new(int32_t);
+void http_router_new(http_expected_router_error_t *ret0) {
   int32_t ptr = (int32_t) &RET_AREA;
-  
-  if ((ret).is_err) {
-    const http_error_t *payload0 = &(ret).val.err;
-    *((int8_t*)(ptr + 0)) = 1;
-    switch ((int32_t) (*payload0).tag) {
-      case 0: {
-        const http_string_t *payload1 = &(*payload0).val.error_with_description;
-        *((int8_t*)(ptr + 4)) = 0;
-        *((int32_t*)(ptr + 12)) = (int32_t) (*payload1).len;
-        *((int32_t*)(ptr + 8)) = (int32_t) (*payload1).ptr;
-        break;
-      }
+  __wasm_import_http_router_new(ptr);
+  http_expected_router_error_t expected;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      expected.is_err = false;
+      
+      expected.val.ok = (http_router_t){ *((int32_t*) (ptr + 4)) };
+      break;
     }
-    
-  } else {
-    const http_router_t *payload = &(ret).val.ok;
-    *((int8_t*)(ptr + 0)) = 0;
-    *((int32_t*)(ptr + 4)) = (*payload).idx;
-    
-  }
-  return ptr;
+    case 1: {
+      expected.is_err = true;
+      http_error_t variant;
+      variant.tag = (int32_t) (*((uint8_t*) (ptr + 4)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          variant.val.error_with_description = (http_string_t) { (char*)(*((int32_t*) (ptr + 8))), (size_t)(*((int32_t*) (ptr + 12))) };
+          break;
+        }
+      }
+      
+      expected.val.err = variant;
+      break;
+    }
+  }*ret0 = expected;
 }
-__attribute__((export_name("router::new-with-base")))
-int32_t __wasm_export_http_router_new_with_base(int32_t arg, int32_t arg0) {
-  http_uri_t arg1 = (http_string_t) { (char*)(arg), (size_t)(arg0) };
-  http_expected_router_error_t ret;
-  http_router_new_with_base(&arg1, &ret);
+__attribute__((import_module("http"), import_name("router::new-with-base")))
+void __wasm_import_http_router_new_with_base(int32_t, int32_t, int32_t);
+void http_router_new_with_base(http_uri_t *base, http_expected_router_error_t *ret0) {
   int32_t ptr = (int32_t) &RET_AREA;
-  
-  if ((ret).is_err) {
-    const http_error_t *payload2 = &(ret).val.err;
-    *((int8_t*)(ptr + 0)) = 1;
-    switch ((int32_t) (*payload2).tag) {
-      case 0: {
-        const http_string_t *payload3 = &(*payload2).val.error_with_description;
-        *((int8_t*)(ptr + 4)) = 0;
-        *((int32_t*)(ptr + 12)) = (int32_t) (*payload3).len;
-        *((int32_t*)(ptr + 8)) = (int32_t) (*payload3).ptr;
-        break;
-      }
+  __wasm_import_http_router_new_with_base((int32_t) (*base).ptr, (int32_t) (*base).len, ptr);
+  http_expected_router_error_t expected;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      expected.is_err = false;
+      
+      expected.val.ok = (http_router_t){ *((int32_t*) (ptr + 4)) };
+      break;
     }
-    
-  } else {
-    const http_router_t *payload = &(ret).val.ok;
-    *((int8_t*)(ptr + 0)) = 0;
-    *((int32_t*)(ptr + 4)) = (*payload).idx;
-    
-  }
-  return ptr;
+    case 1: {
+      expected.is_err = true;
+      http_error_t variant;
+      variant.tag = (int32_t) (*((uint8_t*) (ptr + 4)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          variant.val.error_with_description = (http_string_t) { (char*)(*((int32_t*) (ptr + 8))), (size_t)(*((int32_t*) (ptr + 12))) };
+          break;
+        }
+      }
+      
+      expected.val.err = variant;
+      break;
+    }
+  }*ret0 = expected;
 }
-__attribute__((export_name("router::get")))
-int32_t __wasm_export_http_router_get(int32_t arg, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3) {
-  http_string_t arg4 = (http_string_t) { (char*)(arg0), (size_t)(arg1) };
-  http_string_t arg5 = (http_string_t) { (char*)(arg2), (size_t)(arg3) };
-  http_expected_router_error_t ret;
-  http_router_get((http_router_t){ arg }, &arg4, &arg5, &ret);
+__attribute__((import_module("http"), import_name("router::get")))
+void __wasm_import_http_router_get(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t);
+void http_router_get(http_router_t self, http_string_t *route, http_string_t *handler, http_expected_router_error_t *ret0) {
   int32_t ptr = (int32_t) &RET_AREA;
-  
-  if ((ret).is_err) {
-    const http_error_t *payload6 = &(ret).val.err;
-    *((int8_t*)(ptr + 0)) = 1;
-    switch ((int32_t) (*payload6).tag) {
-      case 0: {
-        const http_string_t *payload7 = &(*payload6).val.error_with_description;
-        *((int8_t*)(ptr + 4)) = 0;
-        *((int32_t*)(ptr + 12)) = (int32_t) (*payload7).len;
-        *((int32_t*)(ptr + 8)) = (int32_t) (*payload7).ptr;
-        break;
-      }
+  __wasm_import_http_router_get((self).idx, (int32_t) (*route).ptr, (int32_t) (*route).len, (int32_t) (*handler).ptr, (int32_t) (*handler).len, ptr);
+  http_expected_router_error_t expected;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      expected.is_err = false;
+      
+      expected.val.ok = (http_router_t){ *((int32_t*) (ptr + 4)) };
+      break;
     }
-    
-  } else {
-    const http_router_t *payload = &(ret).val.ok;
-    *((int8_t*)(ptr + 0)) = 0;
-    *((int32_t*)(ptr + 4)) = (*payload).idx;
-    
-  }
-  return ptr;
+    case 1: {
+      expected.is_err = true;
+      http_error_t variant;
+      variant.tag = (int32_t) (*((uint8_t*) (ptr + 4)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          variant.val.error_with_description = (http_string_t) { (char*)(*((int32_t*) (ptr + 8))), (size_t)(*((int32_t*) (ptr + 12))) };
+          break;
+        }
+      }
+      
+      expected.val.err = variant;
+      break;
+    }
+  }*ret0 = expected;
 }
-__attribute__((export_name("router::put")))
-int32_t __wasm_export_http_router_put(int32_t arg, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3) {
-  http_string_t arg4 = (http_string_t) { (char*)(arg0), (size_t)(arg1) };
-  http_string_t arg5 = (http_string_t) { (char*)(arg2), (size_t)(arg3) };
-  http_expected_router_error_t ret;
-  http_router_put((http_router_t){ arg }, &arg4, &arg5, &ret);
+__attribute__((import_module("http"), import_name("router::put")))
+void __wasm_import_http_router_put(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t);
+void http_router_put(http_router_t self, http_string_t *route, http_string_t *handler, http_expected_router_error_t *ret0) {
   int32_t ptr = (int32_t) &RET_AREA;
-  
-  if ((ret).is_err) {
-    const http_error_t *payload6 = &(ret).val.err;
-    *((int8_t*)(ptr + 0)) = 1;
-    switch ((int32_t) (*payload6).tag) {
-      case 0: {
-        const http_string_t *payload7 = &(*payload6).val.error_with_description;
-        *((int8_t*)(ptr + 4)) = 0;
-        *((int32_t*)(ptr + 12)) = (int32_t) (*payload7).len;
-        *((int32_t*)(ptr + 8)) = (int32_t) (*payload7).ptr;
-        break;
-      }
+  __wasm_import_http_router_put((self).idx, (int32_t) (*route).ptr, (int32_t) (*route).len, (int32_t) (*handler).ptr, (int32_t) (*handler).len, ptr);
+  http_expected_router_error_t expected;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      expected.is_err = false;
+      
+      expected.val.ok = (http_router_t){ *((int32_t*) (ptr + 4)) };
+      break;
     }
-    
-  } else {
-    const http_router_t *payload = &(ret).val.ok;
-    *((int8_t*)(ptr + 0)) = 0;
-    *((int32_t*)(ptr + 4)) = (*payload).idx;
-    
-  }
-  return ptr;
+    case 1: {
+      expected.is_err = true;
+      http_error_t variant;
+      variant.tag = (int32_t) (*((uint8_t*) (ptr + 4)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          variant.val.error_with_description = (http_string_t) { (char*)(*((int32_t*) (ptr + 8))), (size_t)(*((int32_t*) (ptr + 12))) };
+          break;
+        }
+      }
+      
+      expected.val.err = variant;
+      break;
+    }
+  }*ret0 = expected;
 }
-__attribute__((export_name("router::post")))
-int32_t __wasm_export_http_router_post(int32_t arg, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3) {
-  http_string_t arg4 = (http_string_t) { (char*)(arg0), (size_t)(arg1) };
-  http_string_t arg5 = (http_string_t) { (char*)(arg2), (size_t)(arg3) };
-  http_expected_router_error_t ret;
-  http_router_post((http_router_t){ arg }, &arg4, &arg5, &ret);
+__attribute__((import_module("http"), import_name("router::post")))
+void __wasm_import_http_router_post(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t);
+void http_router_post(http_router_t self, http_string_t *route, http_string_t *handler, http_expected_router_error_t *ret0) {
   int32_t ptr = (int32_t) &RET_AREA;
-  
-  if ((ret).is_err) {
-    const http_error_t *payload6 = &(ret).val.err;
-    *((int8_t*)(ptr + 0)) = 1;
-    switch ((int32_t) (*payload6).tag) {
-      case 0: {
-        const http_string_t *payload7 = &(*payload6).val.error_with_description;
-        *((int8_t*)(ptr + 4)) = 0;
-        *((int32_t*)(ptr + 12)) = (int32_t) (*payload7).len;
-        *((int32_t*)(ptr + 8)) = (int32_t) (*payload7).ptr;
-        break;
-      }
+  __wasm_import_http_router_post((self).idx, (int32_t) (*route).ptr, (int32_t) (*route).len, (int32_t) (*handler).ptr, (int32_t) (*handler).len, ptr);
+  http_expected_router_error_t expected;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      expected.is_err = false;
+      
+      expected.val.ok = (http_router_t){ *((int32_t*) (ptr + 4)) };
+      break;
     }
-    
-  } else {
-    const http_router_t *payload = &(ret).val.ok;
-    *((int8_t*)(ptr + 0)) = 0;
-    *((int32_t*)(ptr + 4)) = (*payload).idx;
-    
-  }
-  return ptr;
+    case 1: {
+      expected.is_err = true;
+      http_error_t variant;
+      variant.tag = (int32_t) (*((uint8_t*) (ptr + 4)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          variant.val.error_with_description = (http_string_t) { (char*)(*((int32_t*) (ptr + 8))), (size_t)(*((int32_t*) (ptr + 12))) };
+          break;
+        }
+      }
+      
+      expected.val.err = variant;
+      break;
+    }
+  }*ret0 = expected;
 }
-__attribute__((export_name("router::delete")))
-int32_t __wasm_export_http_router_delete(int32_t arg, int32_t arg0, int32_t arg1, int32_t arg2, int32_t arg3) {
-  http_string_t arg4 = (http_string_t) { (char*)(arg0), (size_t)(arg1) };
-  http_string_t arg5 = (http_string_t) { (char*)(arg2), (size_t)(arg3) };
-  http_expected_router_error_t ret;
-  http_router_delete((http_router_t){ arg }, &arg4, &arg5, &ret);
+__attribute__((import_module("http"), import_name("router::delete")))
+void __wasm_import_http_router_delete(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t);
+void http_router_delete(http_router_t self, http_string_t *route, http_string_t *handler, http_expected_router_error_t *ret0) {
   int32_t ptr = (int32_t) &RET_AREA;
-  
-  if ((ret).is_err) {
-    const http_error_t *payload6 = &(ret).val.err;
-    *((int8_t*)(ptr + 0)) = 1;
-    switch ((int32_t) (*payload6).tag) {
-      case 0: {
-        const http_string_t *payload7 = &(*payload6).val.error_with_description;
-        *((int8_t*)(ptr + 4)) = 0;
-        *((int32_t*)(ptr + 12)) = (int32_t) (*payload7).len;
-        *((int32_t*)(ptr + 8)) = (int32_t) (*payload7).ptr;
-        break;
-      }
+  __wasm_import_http_router_delete((self).idx, (int32_t) (*route).ptr, (int32_t) (*route).len, (int32_t) (*handler).ptr, (int32_t) (*handler).len, ptr);
+  http_expected_router_error_t expected;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      expected.is_err = false;
+      
+      expected.val.ok = (http_router_t){ *((int32_t*) (ptr + 4)) };
+      break;
     }
-    
-  } else {
-    const http_router_t *payload = &(ret).val.ok;
-    *((int8_t*)(ptr + 0)) = 0;
-    *((int32_t*)(ptr + 4)) = (*payload).idx;
-    
-  }
-  return ptr;
+    case 1: {
+      expected.is_err = true;
+      http_error_t variant;
+      variant.tag = (int32_t) (*((uint8_t*) (ptr + 4)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          variant.val.error_with_description = (http_string_t) { (char*)(*((int32_t*) (ptr + 8))), (size_t)(*((int32_t*) (ptr + 12))) };
+          break;
+        }
+      }
+      
+      expected.val.err = variant;
+      break;
+    }
+  }*ret0 = expected;
 }
-__attribute__((export_name("server::serve")))
-int32_t __wasm_export_http_server_serve(int32_t arg, int32_t arg0, int32_t arg1) {
-  http_string_t arg2 = (http_string_t) { (char*)(arg), (size_t)(arg0) };
-  http_expected_server_error_t ret;
-  http_server_serve(&arg2, (http_router_t){ arg1 }, &ret);
+__attribute__((import_module("http"), import_name("server::serve")))
+void __wasm_import_http_server_serve(int32_t, int32_t, int32_t, int32_t);
+void http_server_serve(http_string_t *address, http_router_t router, http_expected_server_error_t *ret0) {
   int32_t ptr = (int32_t) &RET_AREA;
-  
-  if ((ret).is_err) {
-    const http_error_t *payload3 = &(ret).val.err;
-    *((int8_t*)(ptr + 0)) = 1;
-    switch ((int32_t) (*payload3).tag) {
-      case 0: {
-        const http_string_t *payload4 = &(*payload3).val.error_with_description;
-        *((int8_t*)(ptr + 4)) = 0;
-        *((int32_t*)(ptr + 12)) = (int32_t) (*payload4).len;
-        *((int32_t*)(ptr + 8)) = (int32_t) (*payload4).ptr;
-        break;
-      }
+  __wasm_import_http_server_serve((int32_t) (*address).ptr, (int32_t) (*address).len, (router).idx, ptr);
+  http_expected_server_error_t expected;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      expected.is_err = false;
+      
+      expected.val.ok = (http_server_t){ *((int32_t*) (ptr + 4)) };
+      break;
     }
-    
-  } else {
-    const http_server_t *payload = &(ret).val.ok;
-    *((int8_t*)(ptr + 0)) = 0;
-    *((int32_t*)(ptr + 4)) = (*payload).idx;
-    
-  }
-  return ptr;
+    case 1: {
+      expected.is_err = true;
+      http_error_t variant;
+      variant.tag = (int32_t) (*((uint8_t*) (ptr + 4)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          variant.val.error_with_description = (http_string_t) { (char*)(*((int32_t*) (ptr + 8))), (size_t)(*((int32_t*) (ptr + 12))) };
+          break;
+        }
+      }
+      
+      expected.val.err = variant;
+      break;
+    }
+  }*ret0 = expected;
 }
-__attribute__((export_name("server::stop")))
-int32_t __wasm_export_http_server_stop(int32_t arg) {
-  http_expected_unit_error_t ret;
-  http_server_stop((http_server_t){ arg }, &ret);
+__attribute__((import_module("http"), import_name("server::stop")))
+void __wasm_import_http_server_stop(int32_t, int32_t);
+void http_server_stop(http_server_t self, http_expected_unit_error_t *ret0) {
   int32_t ptr = (int32_t) &RET_AREA;
-  
-  if ((ret).is_err) {
-    const http_error_t *payload0 = &(ret).val.err;
-    *((int8_t*)(ptr + 0)) = 1;
-    switch ((int32_t) (*payload0).tag) {
-      case 0: {
-        const http_string_t *payload1 = &(*payload0).val.error_with_description;
-        *((int8_t*)(ptr + 4)) = 0;
-        *((int32_t*)(ptr + 12)) = (int32_t) (*payload1).len;
-        *((int32_t*)(ptr + 8)) = (int32_t) (*payload1).ptr;
-        break;
-      }
+  __wasm_import_http_server_stop((self).idx, ptr);
+  http_expected_unit_error_t expected;
+  switch ((int32_t) (*((uint8_t*) (ptr + 0)))) {
+    case 0: {
+      expected.is_err = false;
+      
+      
+      break;
     }
-    
-  } else {
-    
-    *((int8_t*)(ptr + 0)) = 0;
-    
-  }
-  return ptr;
+    case 1: {
+      expected.is_err = true;
+      http_error_t variant;
+      variant.tag = (int32_t) (*((uint8_t*) (ptr + 4)));
+      switch ((int32_t) variant.tag) {
+        case 0: {
+          variant.val.error_with_description = (http_string_t) { (char*)(*((int32_t*) (ptr + 8))), (size_t)(*((int32_t*) (ptr + 12))) };
+          break;
+        }
+      }
+      
+      expected.val.err = variant;
+      break;
+    }
+  }*ret0 = expected;
 }

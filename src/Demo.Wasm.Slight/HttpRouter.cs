@@ -21,9 +21,7 @@ namespace Demo.Wasm.Slight
 
         public static HttpRouter Create()
         {
-            WasiExpected<uint> expected = new WasiExpected<uint>();
-
-            HttpRouterFunctions.New(ref expected);
+            HttpRouterFunctions.New(out WasiExpected<uint> expected);
 
             if (expected.IsError)
             {
@@ -42,11 +40,7 @@ namespace Demo.Wasm.Slight
                 throw new Exception($"{route} is already registered.");
             }
 
-            WasiString requestRoute = WasiString.FromString(route);
-            WasiString requestHandler = REQUEST_HANDLER;
-            WasiExpected<uint> expected = new WasiExpected<uint>();
-
-            HttpRouterFunctions.Get(_index, ref requestRoute, ref requestHandler, ref expected);
+            HttpRouterFunctions.Get(_index, WasiString.FromString(route), REQUEST_HANDLER, out WasiExpected<uint> expected);
 
             if (expected.IsError)
             {
@@ -65,11 +59,7 @@ namespace Demo.Wasm.Slight
                 throw new Exception($"{route} is already registered.");
             }
 
-            WasiString requestRoute = WasiString.FromString(route);
-            WasiString requestHandler = REQUEST_HANDLER;
-            WasiExpected<uint> expected = new WasiExpected<uint>();
-
-            HttpRouterFunctions.Put(_index, ref requestRoute, ref requestHandler, ref expected);
+            HttpRouterFunctions.Put(_index, WasiString.FromString(route), REQUEST_HANDLER, out WasiExpected<uint> expected);
 
             if (expected.IsError)
             {
@@ -88,11 +78,7 @@ namespace Demo.Wasm.Slight
                 throw new Exception($"{route} is already registered.");
             }
 
-            WasiString requestRoute = WasiString.FromString(route);
-            WasiString requestHandler = REQUEST_HANDLER;
-            WasiExpected<uint> expected = new WasiExpected<uint>();
-
-            HttpRouterFunctions.Post(_index, ref requestRoute, ref requestHandler, ref expected);
+            HttpRouterFunctions.Post(_index, WasiString.FromString(route), REQUEST_HANDLER, out WasiExpected<uint> expected);
 
             if (expected.IsError)
             {
@@ -111,11 +97,7 @@ namespace Demo.Wasm.Slight
                 throw new Exception($"{route} is already registered.");
             }
 
-            WasiString requestRoute = WasiString.FromString(route);
-            WasiString requestHandler = REQUEST_HANDLER;
-            WasiExpected<uint> expected = new WasiExpected<uint>();
-
-            HttpRouterFunctions.Delete(_index, ref requestRoute, ref requestHandler, ref expected);
+            HttpRouterFunctions.Delete(_index, WasiString.FromString(route), REQUEST_HANDLER, out WasiExpected<uint> expected);
 
             if (expected.IsError)
             {
