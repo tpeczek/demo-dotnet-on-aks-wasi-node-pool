@@ -6,7 +6,7 @@ namespace Demo.Wasm.Slight
     {
         private static readonly WasiString REQUEST_HANDLER = WasiString.FromString("handle-http");
 
-        private readonly uint _index;
+        private uint _index;
         private readonly Dictionary<string, Func<HttpRequest, HttpResponse>> _getHandlers = new Dictionary<string, Func<HttpRequest, HttpResponse>>();
         private readonly Dictionary<string, Func<HttpRequest, HttpResponse>> _putHandlers = new Dictionary<string, Func<HttpRequest, HttpResponse>>();
         private readonly Dictionary<string, Func<HttpRequest, HttpResponse>> _postHandlers = new Dictionary<string, Func<HttpRequest, HttpResponse>>();
@@ -42,10 +42,13 @@ namespace Demo.Wasm.Slight
 
             HttpRouterFunctions.Get(_index, WasiString.FromString(route), REQUEST_HANDLER, out WasiExpected<uint> expected);
 
+#pragma warning disable CS8629 // Nullable value type may be null.
             if (expected.IsError)
             {
                 throw new Exception(expected.Error?.ErrorWithDescription.ToString());
             }
+            _index = expected.Result.Value;
+#pragma warning restore CS8629 // Nullable value type may be null.
 
             _getHandlers.Add(route, handler);
 
@@ -61,10 +64,13 @@ namespace Demo.Wasm.Slight
 
             HttpRouterFunctions.Put(_index, WasiString.FromString(route), REQUEST_HANDLER, out WasiExpected<uint> expected);
 
+#pragma warning disable CS8629 // Nullable value type may be null.
             if (expected.IsError)
             {
                 throw new Exception(expected.Error?.ErrorWithDescription.ToString());
             }
+            _index = expected.Result.Value;
+#pragma warning restore CS8629 // Nullable value type may be null.
 
             _putHandlers.Add(route, handler);
 
@@ -80,10 +86,13 @@ namespace Demo.Wasm.Slight
 
             HttpRouterFunctions.Post(_index, WasiString.FromString(route), REQUEST_HANDLER, out WasiExpected<uint> expected);
 
+#pragma warning disable CS8629 // Nullable value type may be null.
             if (expected.IsError)
             {
                 throw new Exception(expected.Error?.ErrorWithDescription.ToString());
             }
+            _index = expected.Result.Value;
+#pragma warning restore CS8629 // Nullable value type may be null.
 
             _postHandlers.Add(route, handler);
 
@@ -99,28 +108,31 @@ namespace Demo.Wasm.Slight
 
             HttpRouterFunctions.Delete(_index, WasiString.FromString(route), REQUEST_HANDLER, out WasiExpected<uint> expected);
 
+#pragma warning disable CS8629 // Nullable value type may be null.
             if (expected.IsError)
             {
                 throw new Exception(expected.Error?.ErrorWithDescription.ToString());
             }
+            _index = expected.Result.Value;
+#pragma warning restore CS8629 // Nullable value type may be null.
 
             _deleteHandlers.Add(route, handler);
 
             return this;
         }
 
-        internal Func<HttpRequest, HttpResponse>? GetHandler(HttpMethod method, string uri)
+        internal Func<HttpRequest, HttpResponse>? GetHandler(HttpMethod method, string route)
         {
             switch (method)
             {
                 case HttpMethod.GET:
-                    return _getHandlers.GetValueOrDefault(uri);
+                    return _getHandlers.GetValueOrDefault(route);
                 case HttpMethod.PUT:
-                    return _putHandlers.GetValueOrDefault(uri);
+                    return _putHandlers.GetValueOrDefault(route);
                 case HttpMethod.POST:
-                    return _postHandlers.GetValueOrDefault(uri);
+                    return _postHandlers.GetValueOrDefault(route);
                 case HttpMethod.DELETE:
-                    return _deleteHandlers.GetValueOrDefault(uri);
+                    return _deleteHandlers.GetValueOrDefault(route);
                 default:
                     return null;
             }

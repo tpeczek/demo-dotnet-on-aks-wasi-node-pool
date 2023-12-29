@@ -24,7 +24,5 @@ namespace Demo.Wasm.Slight
         {
             _body = new WasiOption<WasiBuffer>(WasiBuffer.FromString(body));
         }
-
-        
     }
 }

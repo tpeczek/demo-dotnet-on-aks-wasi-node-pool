@@ -25,7 +25,7 @@ namespace Demo.Wasm.Slight
 
         public readonly HttpMethod Method => _method;
         
-        public readonly string Uri => _uri.ToString();
+        public readonly Uri Uri => new Uri(_uri.ToString());
         
         public readonly IReadOnlyList<KeyValuePair<string, string>> Headers => _headers.ToArray();
         

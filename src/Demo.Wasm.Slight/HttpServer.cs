@@ -1,5 +1,4 @@
 ﻿using Demo.Wasm.Slight.Wasi;
-using System;
 
 namespace Demo.Wasm.Slight
 {
@@ -44,12 +43,13 @@ namespace Demo.Wasm.Slight
 
         private static unsafe void HandleRequest(ref HttpRequest request, out WasiExpected<HttpResponse> result)
         {
-            Func<HttpRequest, HttpResponse>? handler = _router?.GetHandler(request.Method, request.Uri);
+            string route = request.Uri.AbsolutePath;
+            Func<HttpRequest, HttpResponse>? handler = _router?.GetHandler(request.Method, route);
             if (handler is null)
             {
 
                 HttpResponse response = new HttpResponse(404);
-                response.SetBody($"Handler Not Found (Requested URI: {request.Uri})");
+                response.SetBody($"Handler Not Found (Requested route: {route})");
 
                 result = new WasiExpected<HttpResponse>(response);
             }
