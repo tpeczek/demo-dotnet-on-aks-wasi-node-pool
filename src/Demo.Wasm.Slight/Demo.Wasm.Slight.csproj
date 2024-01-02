@@ -3,8 +3,10 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <RuntimeIdentifier>wasi-wasm</RuntimeIdentifier>
+    <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
     <PublishTrimmed>true</PublishTrimmed>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <WasmSingleFileBundle>true</WasmSingleFileBundle>
   </PropertyGroup>
   <Import Project="build/Demo.Wasm.Slight.targets" />
