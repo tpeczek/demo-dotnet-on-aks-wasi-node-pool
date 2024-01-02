@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="build/Demo.Wasm.Slight.props" />
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <RuntimeIdentifier>wasi-wasm</RuntimeIdentifier>
@@ -6,4 +7,5 @@
     <PublishTrimmed>true</PublishTrimmed>
     <WasmSingleFileBundle>true</WasmSingleFileBundle>
   </PropertyGroup>
+  <Import Project="build/Demo.Wasm.Slight.targets" />
 </Project>

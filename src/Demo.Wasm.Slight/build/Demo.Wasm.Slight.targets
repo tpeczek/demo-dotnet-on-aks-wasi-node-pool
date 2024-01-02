@@ -1,0 +1,5 @@
+<Project>
+	<ItemGroup>
+		<_WasmNativeFileForLinking Include="$(MSBuildThisFileDirectory)\..\native\*.c" />
+    </ItemGroup>
+</Project>
