@@ -18,7 +18,9 @@ namespace Demo.Wasm.Slight
                 throw new Exception("The server is already running!");
             }
 
-            HttpRouter router = HttpRouter.Create();
+            HttpRouter router = HttpRouter.Create()
+                                .RegisterRoute(HttpMethod.GET, "/")
+                                .RegisterRoute(HttpMethod.GET, "/*");
             http_server_serve(WasiString.FromString(address), router.Index, out WasiExpected<uint> expected);
 
             if (expected.IsError)
@@ -29,6 +31,14 @@ namespace Demo.Wasm.Slight
             _index = expected.Result;
         }
 
+        private static unsafe void HandleRequest(ref HttpRequest request, out WasiExpected<HttpResponse> result)
+        {
+            HttpResponse response = new HttpResponse(404);
+            response.SetBody($"Handler Not Found ({request.Method} {request.Uri.AbsolutePath})");
+
+            result = new WasiExpected<HttpResponse>(response);
+        }
+        
         [DllImport(LIBRARY_NAME)]
         internal static extern unsafe void http_server_serve(WasiString address, uint httpRouterIndex, out WasiExpected<uint> ret0);
 
