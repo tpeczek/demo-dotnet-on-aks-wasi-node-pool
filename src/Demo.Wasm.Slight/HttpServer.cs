@@ -19,8 +19,7 @@ namespace Demo.Wasm.Slight
             }
 
             HttpRouter router = HttpRouter.Create()
-                                .RegisterRoute(HttpMethod.GET, "/")
-                                .RegisterRoute(HttpMethod.GET, "/*");
+                                .RegisterRoutes();
             http_server_serve(WasiString.FromString(address), router.Index, out WasiExpected<uint> expected);
 
             if (expected.IsError)
@@ -33,10 +32,15 @@ namespace Demo.Wasm.Slight
 
         private static unsafe void HandleRequest(ref HttpRequest request, out WasiExpected<HttpResponse> result)
         {
-            HttpResponse response = new HttpResponse(404);
-            response.SetBody($"Handler Not Found ({request.Method} {request.Uri.AbsolutePath})");
+            HttpResponse? response = HttpRouter.InvokeRouteHandler(request);
 
-            result = new WasiExpected<HttpResponse>(response);
+            if (!response.HasValue)
+            {
+                response = new HttpResponse(404);
+                response.Value.SetBody($"Handler Not Found ({request.Method} {request.Uri.AbsolutePath})");
+            }
+
+            result = new WasiExpected<HttpResponse>(response.Value);
         }
         
         [DllImport(LIBRARY_NAME)]
